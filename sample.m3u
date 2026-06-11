@@ -1,0 +1,9 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="NASA" tvg-name="NASA TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" group-title="Science & Space",NASA TV
+https://ntv1.akamaized.net/hls/live/2014027/NASA-NTV1-Public/master.m3u8
+#EXTINF:-1 tvg-id="DW" tvg-name="DW English" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/e/e0/Deutsche_Welle_logo_2012.svg" group-title="News",DW English
+https://dwamdstream102.akamaized.net/hls/live/2015532/dwstream102/master.m3u8
+#EXTINF:-1 tvg-id="France24" tvg-name="France 24" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/8/87/France_24_logo.svg" group-title="News",France 24 English
+https://static.france24.com/live/F24_EN_LO_HLS/live_tv.m3u8
+#EXTINF:-1 tvg-id="AlJazeera" tvg-name="Al Jazeera" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/f/f2/Al_Jazeera_English_logo.svg" group-title="News",Al Jazeera English
+https://live-amg-el.akamaized.net/otv/global/aljazeera/eng/direct.m3u8

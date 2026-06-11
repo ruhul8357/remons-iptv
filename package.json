@@ -1,0 +1,16 @@
+{
+  "name": "iptv-player",
+  "version": "1.0.0",
+  "description": "Stunning IPTV Web Player with Admin Access and Logo Caching",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch-path=server.js --watch-path=m3uParser.js --watch-path=logoCache.js server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1"
+  }
+}

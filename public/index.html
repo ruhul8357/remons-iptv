@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REMONS IPTV Player - Premium Live TV Streamer</title>
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=1.0.5">
+  
+  <!-- HLS.js for playing .m3u8 streams on all browsers -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  
+  <!-- Lucide Icons for stunning vector glyphs -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Ambient Backlight Glow -->
+  <div class="ambient-backlight" id="ambientBacklight"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <img src="logo.svg" alt="Remons IPTV Logo" class="brand-logo-img">
+        <div class="pulse-live"></div>
+        <h1>REMONS<span>IPTV</span></h1>
+      </div>
+      <div class="header-actions">
+        <button id="adminBtn" class="btn btn-secondary">
+          <i data-lucide="settings"></i>
+          <span>Admin Dashboard</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Player Component (TOP) -->
+      <section class="player-section">
+        <div class="player-wrapper" id="playerWrapper">
+          
+          <!-- Native Video Element -->
+          <video id="videoPlayer" playsinline></video>
+
+          <!-- Loading Spinner -->
+          <div class="player-overlay loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <p>Loading Stream...</p>
+          </div>
+
+          <!-- Error Overlay -->
+          <div class="player-overlay error-overlay" id="errorOverlay">
+            <i data-lucide="alert-circle" class="error-icon"></i>
+            <h3>Unable to Load Stream</h3>
+            <p id="errorMsg">The stream link is offline, has CORS restrictions, or is invalid.</p>
+            <button class="btn btn-primary" id="retryBtn">
+              <i data-lucide="refresh-cw"></i> Retry
+            </button>
+          </div>
+
+          <!-- Splash Overlay (Before playback start) -->
+          <div class="player-overlay splash-overlay" id="splashOverlay">
+            <i data-lucide="tv" class="splash-icon"></i>
+            <h2>Select a Channel to Watch</h2>
+            <p>Choose from the premium list below to start streaming live TV</p>
+          </div>
+
+          <!-- Custom Control Bar -->
+          <div class="player-controls-overlay" id="playerControls">
+            <!-- Top Controls (Title display) -->
+            <div class="controls-top">
+              <div class="playing-channel-info">
+                <span class="live-tag">LIVE</span>
+                <img id="playingChannelLogo" class="playing-channel-logo" src="" alt="" style="display: none;">
+                <span id="playingChannelName" class="channel-title-display">No Channel Playing</span>
+              </div>
+            </div>
+
+            <!-- Bottom Controls (Action items) -->
+            <div class="controls-bottom">
+              <div class="controls-left">
+                <button class="control-btn" id="playPauseBtn" title="Play/Pause">
+                  <i data-lucide="play"></i>
+                </button>
+                <div class="volume-container">
+                  <button class="control-btn" id="muteBtn" title="Mute/Unmute">
+                    <i data-lucide="volume-2"></i>
+                  </button>
+                  <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" class="volume-slider">
+                </div>
+                <div class="live-indicator-wrapper">
+                  <span class="pulse-live red-dot"></span>
+                  <span class="live-text" id="liveTimer">00:00:00</span>
+                </div>
+              </div>
+
+              <div class="controls-right">
+                <button class="control-btn" id="pipBtn" title="Picture in Picture">
+                  <i data-lucide="external-link"></i>
+                </button>
+                <button class="control-btn" id="theaterBtn" title="Theater Mode">
+                  <i data-lucide="layout"></i>
+                </button>
+                <button class="control-btn" id="fullscreenBtn" title="Fullscreen">
+                  <i data-lucide="maximize"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Channels & Search Section (BOTTOM) -->
+      <section class="channels-section">
+        <!-- Search and Filter Bar -->
+        <div class="filter-bar">
+          <div class="search-box">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="searchBar" placeholder="Search live channels...">
+            <button id="clearSearch" class="clear-search-btn" style="display:none;">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          
+          <!-- Category Selector -->
+          <div class="categories-wrapper">
+            <div class="categories-scroll" id="categoriesContainer">
+              <!-- Dynamically populated categories -->
+              <button class="category-pill active">All Channels</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Channels Grid -->
+        <div class="channels-grid" id="channelsGrid">
+          <!-- Dynamically populated cards -->
+          <!-- Skeleton Loading State -->
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <i data-lucide="search-code" class="empty-icon"></i>
+          <h3>No Channels Found</h3>
+          <p>Try adjusting your search filters or check your M3U playlist config.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer-bar">
+      <p>&copy; 2026 Remons IPTV. Powered by HLS.js. Sleek, fast, and cache-optimized.</p>
+    </footer>
+  </div>
+
+  <!-- Admin Modal -->
+  <div class="modal-backdrop" id="adminModal">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h2><i data-lucide="shield-check"></i> Admin Administration</h2>
+        <button class="close-modal-btn" id="closeModalBtn">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <!-- Auth Screen -->
+      <div class="modal-body" id="modalAuthSection">
+        <p class="auth-message">Please enter the administrator password to unlock features like playlist upload and cache management.</p>
+        <form id="loginForm" class="admin-form">
+          <div class="form-group">
+            <label for="adminPassword">Admin Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="adminPassword" placeholder="••••••••" required>
+              <button type="button" id="togglePasswordBtn" class="toggle-pwd-btn">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+            <p class="error-msg" id="authErrorMsg"></p>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Unlock Dashboard</button>
+        </form>
+      </div>
+
+      <!-- Dashboard Screen -->
+      <div class="modal-body" id="modalDashboardSection" style="display: none;">
+        <!-- Tabs -->
+        <div class="modal-tabs">
+          <button class="tab-btn active" data-tab="uploadTab">Upload Playlist</button>
+          <button class="tab-btn" data-tab="settingsTab">Settings</button>
+          <button class="tab-btn" data-tab="systemTab">System Cache</button>
+        </div>
+
+        <!-- Tab 1: Upload -->
+        <div class="tab-content" id="uploadTab">
+          <form id="uploadPlaylistForm" class="admin-form">
+            <div class="form-group">
+              <label>Select Playlist Source</label>
+              <div class="source-selector">
+                <label class="radio-label">
+                  <input type="radio" name="playlistSource" value="file" checked>
+                  <span>Upload Local M3U File</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="playlistSource" value="url">
+                  <span>Remote Playlist URL</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- File Upload Group -->
+            <div class="form-group" id="fileSourceGroup">
+              <label for="playlistFileInput" class="file-drop-zone">
+                <i data-lucide="upload-cloud"></i>
+                <span class="file-label-text">Drag & drop your .m3u file here or click to browse</span>
+                <span class="file-name-display" id="fileNameDisplay">No file selected</span>
+                <input type="file" id="playlistFileInput" accept=".m3u,.m3u8" style="display: none;">
+              </label>
+            </div>
+
+            <!-- URL Upload Group -->
+            <div class="form-group" id="urlSourceGroup" style="display: none;">
+              <label for="playlistUrlInput">M3U Playlist URL</label>
+              <input type="url" id="playlistUrlInput" placeholder="https://example.com/playlist.m3u" class="form-control">
+            </div>
+
+            <div class="status-msg" id="uploadStatusMsg"></div>
+            <button type="submit" class="btn btn-primary btn-block" id="uploadBtn">
+              <i data-lucide="send"></i> Load Playlist
+            </button>
+          </form>
+        </div>
+
+        <!-- Tab 2: Settings -->
+        <div class="tab-content" id="settingsTab" style="display: none;">
+          <form id="settingsForm" class="admin-form">
+            <div class="form-group">
+              <label for="cacheDurationInput">Logo Cache Expiry (Days)</label>
+              <input type="number" id="cacheDurationInput" min="1" max="30" value="3" class="form-control" required>
+              <p class="field-hint">Logos will be re-fetched from the source after this period to verify availability and updates.</p>
+            </div>
+            
+            <div class="form-group">
+              <label for="newPasswordInput">New Admin Password</label>
+              <input type="password" id="newPasswordInput" placeholder="Leave blank to keep current" class="form-control">
+            </div>
+
+            <div class="status-msg" id="settingsStatusMsg"></div>
+            <button type="submit" class="btn btn-primary btn-block">Save Settings</button>
+          </form>
+        </div>
+
+        <!-- Tab 3: Cache Info / Revalidate -->
+        <div class="tab-content" id="systemTab" style="display: none;">
+          <div class="system-stats">
+            <div class="stat-card">
+              <span class="stat-title">Loaded Channels</span>
+              <span class="stat-value" id="statsChannelsCount">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-title">Cached Logos</span>
+              <span class="stat-value" id="statsLogosCount">0</span>
+            </div>
+          </div>
+          
+          <div class="cache-operations">
+            <h3>Cache Control Operations</h3>
+            <p class="field-hint">Force revalidation instructs the backend to query source logo URLs to see if they're still online or if updated assets are available.</p>
+            <button class="btn btn-secondary btn-block" id="forceRevalidateBtn">
+              <i data-lucide="refresh-cw"></i> Force Logo Revalidation Now
+            </button>
+            <div class="status-msg" id="revalidateStatusMsg"></div>
+          </div>
+        </div>
+
+        <!-- Logout btn -->
+        <div class="modal-footer-dashboard">
+          <button id="logoutBtn" class="btn btn-danger-outline">
+            <i data-lucide="log-out"></i> Log Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=1.0.5"></script>
+</body>
+</html>

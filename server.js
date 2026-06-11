@@ -279,7 +279,11 @@ async function preloadDefaultPlaylist() {
       const parsedChannels = parseM3U(m3uContent);
       
       if (parsedChannels && parsedChannels.length > 0) {
-        console.log(`Resolving web logos for default ${parsedChannels.length} channels...`);
+        // Save the channels list immediately so the user can watch them right away!
+        db.channels = parsedChannels;
+        await writeDb(db);
+        console.log(`Initial playlist channels written to database. Resolving web logos for default ${parsedChannels.length} channels...`);
+
         for (let i = 0; i < parsedChannels.length; i++) {
           const channel = parsedChannels[i];
           // Search web, download, and store local static logo path

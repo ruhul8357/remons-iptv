@@ -268,15 +268,12 @@ app.post('/api/admin/revalidate', authenticateAdmin, async (req, res) => {
   }
 });
 
-// Start the Express server
-async function start() {
-  await initCacheDirs();
-  
-  // Preload default Fifa World Cup playlist from GitHub if empty or containing placeholder channels
+// Preload default Fifa World Cup playlist from GitHub if empty or containing placeholder channels
+async function preloadDefaultPlaylist() {
   try {
     const db = await readDb();
     if (!db.channels || db.channels.length === 0 || db.channels.some(c => c.id.includes('nasa-tv-1'))) {
-      console.log('Preloading default Fifa World Cup playlist from GitHub...');
+      console.log('Preloading default Fifa World Cup playlist from GitHub in background...');
       const defaultUrl = 'https://raw.githubusercontent.com/mahadi-devsnest/Fifa-world-cup-hd-m3u-link-/refs/heads/main/Fifa-world-cup-2026-hd-link.m3u8';
       const m3uContent = await fetchRemoteM3U(defaultUrl);
       const parsedChannels = parseM3U(m3uContent);
@@ -296,8 +293,25 @@ async function start() {
       }
     }
   } catch (err) {
-    console.error('Failed to preload default playlist:', err.message);
+    console.error('Failed to preload default playlist in background:', err.message);
   }
+}
+
+// Start the Express server
+async function start() {
+  await initCacheDirs();
+  
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(` IPTV Web Player server listening on port ${PORT}`);
+    console.log(` Access Local App at: http://localhost:${PORT}`);
+    console.log(`=======================================================`);
+  });
+
+  // Run the preload sequence asynchronously in the background
+  preloadDefaultPlaylist().catch(err => {
+    console.error('Asynchronous playlist preloading failed:', err);
+  });
   
   // Start the background logo revalidation timer (sweeps database every 24 hours)
   setInterval(async () => {
@@ -320,13 +334,6 @@ async function start() {
       console.error('Failed to run initial startup logo revalidation:', err);
     }
   }, 10000);
-  
-  app.listen(PORT, () => {
-    console.log(`=======================================================`);
-    console.log(` IPTV Web Player server listening on port ${PORT}`);
-    console.log(` Access Local App at: http://localhost:${PORT}`);
-    console.log(`=======================================================`);
-  });
 }
 
 start();
